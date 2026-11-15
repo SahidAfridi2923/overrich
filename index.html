@@ -909,7 +909,7 @@ button.addr-card:hover{border-color:var(--ink)}
 </head>
 <body>
 
-<div class="announce"><div class="wrap"><span id="announceText">Free shipping on orders above <b>₹999</b> · Use <b>OVER10</b> for an extra 10% off</span></div></div>
+<div class="announce"><div class="wrap"><span id="announceText"><b>Flat 40% off sitewide</b> · New Year Rich Sale ends 31 Jan</span></div></div>
 
 <header class="header">
   <div class="wrap">
@@ -1030,7 +1030,10 @@ button.addr-card:hover{border-color:var(--ink)}
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 /* ================= Data ================= */
-const SALE_END=new Date('2026-11-09T23:59:59+05:30').getTime();
+/* Sitewide sale: flat 40% off every tee's selling price. Runs until 31 Jan 2027, 11:59 PM IST, then prices revert by themselves. */
+const SALE={pct:40,name:'New Year Rich Sale',endLabel:'31 Jan 2027, 11:59 PM',start:new Date('2026-11-15T00:00:00+05:30').getTime(),end:new Date('2027-01-31T23:59:59+05:30').getTime()};
+const saleOn=()=>{const n=Date.now();return n>=SALE.start&&n<=SALE.end};
+const SALE_END=SALE.end;
 const DROP_END=new Date('2026-11-15T20:00:00+05:30').getTime();
 const COLORS={
   black:{n:'Jet Black',h:'#1F1E22'},white:{n:'Off White',h:'#F2F0EB'},cream:{n:'Cream',h:'#E9DFCB'},oxblood:{n:'Oxblood',h:'#6B1D2B'},
@@ -1108,6 +1111,8 @@ mk(32,'Soft Life Cropped Tee','her',899,['cream','lavender','white'],W('word','S
 mk(33,'Petal Crest Cropped','her',949,['sky','white','lavender'],W('crest','SOFT CLUB · EST 2026 · '),{fit:'cropped'});
 mk(34,'Main Character Acid Crop','her',999,['charcoal','black'],W('word','MAIN|CHARACTER'),{design:'typography',fit:'cropped',fab:'acid',drop:2,wk:410});
 P.forEach(p=>{p.desc=descFor(p)});
+/* During the sale the regular price becomes the struck-through price and the sale price is charged */
+SALE.applied=saleOn();if(SALE.applied)P.forEach(p=>{p.reg=p.price;p.mrp=p.price;p.price=Math.round(p.price*(1-SALE.pct/100))});
 function descFor(p){
   const base={gilded:'Part of the numbered Gilded Edition run. Metallic-gold print on garment-dyed heavyweight cotton, finished with a woven neck label carrying your piece number.',
   'old-money':'Clean heritage graphics with a country-club attitude. Soft-washed for a lived-in hand-feel from the very first wear.',
@@ -1488,15 +1493,15 @@ function pageHome(){
       <div class="arrows"><button data-act="hero-prev" aria-label="Previous slide">←</button><button data-act="hero-next" aria-label="Next slide">→</button></div></div></div>
   </section>
 
-  <section class="sec-tight"><div class="wrap">
+  ${saleOn()?`<section class="sec-tight"><div class="wrap">
     <div class="offer" data-aos="zoom-in">
-      <div style="position:relative;z-index:1"><span class="eyebrow" style="color:#E6BE73">Diwali Rich Sale</span>
-        <h2 style="margin-top:10px">Flat <span class="big">40% off</span> sitewide</h2>
-        <p>Plus an extra 10% at checkout on every order. Free shipping above ₹999 and cash on delivery across India.</p>
+      <div style="position:relative;z-index:1"><span class="eyebrow" style="color:#E6BE73">${SALE.name} · Live now</span>
+        <h2 style="margin-top:10px">Flat <span class="big">${SALE.pct}% off</span> sitewide</h2>
+        <p>Every tee, every collection, already marked down. Stack an extra 10% at checkout with the code below. Free shipping above ₹999 and cash on delivery across India.</p>
         <div class="code-chip">OVER10 <button data-act="copy" data-code="OVER10">Copy code</button></div>
       </div>
-      <div class="countdown" data-countdown="${SALE_END}"><div class="cd-label">Sale ends 9 Nov, midnight</div>${['Days','Hrs','Min','Sec'].map(u=>`<div class="cd-box"><b data-u="${u}">00</b><span>${u}</span></div>`).join('')}</div>
-    </div></div></section>
+      <div class="countdown" data-countdown="${SALE_END}"><div class="cd-label">Sale ends ${SALE.endLabel}</div>${['Days','Hrs','Min','Sec'].map(u=>`<div class="cd-box"><b data-u="${u}">00</b><span>${u}</span></div>`).join('')}</div>
+    </div></div></section>`:''}
 
   ${scrollerSection('scCol','Seven collections','Shop by collection',COLLECTIONS.map(c=>`<a class="col-card" href="#collection-${c.id}"><img src="${colImg(c)}" alt="${c.n}" loading="lazy" decoding="async"><div class="cap"><h3>${c.n}</h3><span>${c.d} · ${P.filter(p=>p.col===c.id).length} styles</span></div></a>`).join(''),'#collections')}
 
@@ -1631,7 +1636,7 @@ function pagePDP(id){
     <div class="pdp-info">
       <div><a class="eyebrow" href="#collection-${p.col}">${colName(p.col)}</a><h1 style="margin-top:8px">${esc(p.n)}</h1>
         <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap"><span class="rate" style="font-size:13px">${STAR}${rt.r}</span><a href="#reviews" data-act="to-reviews" class="muted" style="font-size:13px;text-decoration:underline">${rt.n.toLocaleString('en-IN')} ratings</a><span class="muted" style="font-size:13px">· ${p.gsm} GSM · ${FIT_L[p.fit]} · ${SLV_L[p.sleeve]}</span></div></div>
-      <div><div class="pdp-price"><span class="price">${inr(p.price)}</span><span class="mrp">MRP ${inr(p.mrp)}</span><span class="off">${offPct(p)}% OFF</span></div><span class="tax">Inclusive of all taxes</span></div>
+      <div><div class="pdp-price"><span class="price">${inr(p.price)}</span><span class="mrp">${SALE.applied?'':'MRP '}${inr(p.mrp)}</span><span class="off">${offPct(p)}% OFF</span></div><span class="tax">${SALE.applied?`${SALE.name} price · ends ${SALE.endLabel} · `:''}Inclusive of all taxes</span></div>
       <div><div class="opt-h">Colour <span>${COLORS[s.color].n}</span></div><div class="sw-grid">${p.colors.map(c=>`<button class="sw ${c===s.color?'on':''}" style="background:${COLORS[c].h};width:40px;height:40px" data-act="pdp-color" data-v="${c}" aria-label="${COLORS[c].n}" aria-pressed="${c===s.color}"></button>`).join('')}</div></div>
       <div><div class="opt-h">Select size <button class="link" data-act="sizeguide" style="font-size:13px">Size guide &amp; finder</button></div>
         <div class="size-grid">${SIZES.map(z=>`<button class="size-btn ${z===s.size?'on':''} ${isOut(p,z)?'na':''}" data-act="pdp-size" data-v="${z}" aria-pressed="${z===s.size}" ${isOut(p,z)?'aria-disabled="true" title="Out of stock"':''}>${z}</button>`).join('')}</div>
@@ -1790,7 +1795,7 @@ function totals(){
   return {sub,mrp,disc:mrp-sub,cp,ship,total:after+ship,count:state.cart.reduce((a,i)=>a+i.qty,0)};
 }
 function summaryBox(btn,totalLabel='Order total'){const t=totals();return `<div class="box" style="display:flex;flex-direction:column;gap:10px"><b>Price details <span class="muted" style="font-weight:500">(${t.count} ${t.count===1?'item':'items'})</span></b>
-  <div class="sum-row"><span>Total MRP</span><span>${inr(t.mrp)}</span></div><div class="sum-row"><span>Discount on MRP</span><span class="g">−${inr(t.disc)}</span></div>
+  <div class="sum-row"><span>${SALE.applied?'Regular price':'Total MRP'}</span><span>${inr(t.mrp)}</span></div><div class="sum-row"><span>${SALE.applied?`${SALE.name} (${SALE.pct}% off)`:'Discount on MRP'}</span><span class="g">−${inr(t.disc)}</span></div>
   <div class="sum-row"><span><b>Subtotal</b></span><span><b>${inr(t.sub)}</b></span></div>
   ${t.cp?`<div class="sum-row"><span>Coupon (${state.coupon})</span><span class="g">−${inr(t.cp)}</span></div>`:''}
   <div class="sum-row"><span>Delivery</span><span>${t.ship?inr(t.ship):'<span class="g">FREE</span>'}</span></div>
@@ -1908,6 +1913,7 @@ function pageReview(){const co=state.co,t=totals(),a=selAddr(),r=recSize(),probs
   <div class="paybar"><div><b class="num">${inr(t.total)}</b><span class="muted">Cash on delivery</span></div><button class="btn btn-brand" data-act="place-order" ${probs.length?'disabled':''}>Confirm order</button></div>`}
 function newOrderId(){const d=new Date(),ymd=String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');let id;do{id='OR'+ymd+'-'+randHex(3).toUpperCase()}while(state.orders.some(o=>o.id===id));return id}
 function placeOrder(){
+  if(SALE.applied&&!saleOn()){toast('The sale has ended, so prices have been updated. Reloading…');setTimeout(()=>location.reload(),1500);return}
   state.inv=loadInventory();state.orders=store.get(K.orders,[]);
   const probs=cartProblems();if(probs.length){toast(probs[0]);rerender();return}
   const t=totals(),co=state.co,a=selAddr(),now=Date.now();if(!a||!state.cart.length){co.step='details';rerender();return}
@@ -2412,7 +2418,8 @@ $('#modalOv').addEventListener('click',e=>{if(e.target.id==='modalOv')closeModal
 $('#drawerOv').addEventListener('click',closeDrawer);
 
 /* ================= Announcement rotation ================= */
-const ANN=['Free shipping on orders above <b>₹999</b> · Use <b>OVER10</b> for an extra 10% off','<b>Gilded Edition</b> drops 15 Nov · Only 300 numbered pieces','Cash on delivery across India · <b>7-day</b> easy returns'];let annI=0;
+const ANN=[...(saleOn()?[`<b>Flat ${SALE.pct}% off sitewide</b> · ${SALE.name} ends 31 Jan`]:[]),'Free shipping on orders above <b>₹999</b> · Use <b>OVER10</b> for an extra 10% off','<b>Gilded Edition</b> drops 15 Nov · Only 300 numbered pieces','Cash on delivery across India · <b>7-day</b> easy returns'];let annI=0;
+$('#announceText').innerHTML=ANN[0];
 setInterval(()=>{annI=(annI+1)%ANN.length;const el=$('#announceText');el.style.opacity=0;setTimeout(()=>{el.innerHTML=ANN[annI];el.style.opacity=1},250)},4500);
 $('#announceText').style.transition='opacity .25s';
 
