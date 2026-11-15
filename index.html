@@ -819,6 +819,9 @@ details.acc div{margin-top:10px;color:var(--muted);font-size:14px}
 @media (max-width:980px){.search-tog{display:none}}
 
 /* ===== Stage 2 ===== */
+.cd-live{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:22px;color:#E6BE73;padding:12px 18px;border:1px solid rgba(230,190,115,.4);border-radius:14px;background:rgba(230,190,115,.1)}
+.pulse-dot{width:10px;height:10px;border-radius:50%;background:#E6BE73;animation:pd 1.2s infinite}
+@keyframes pd{0%{box-shadow:0 0 0 0 rgba(230,190,115,.6)}100%{box-shadow:0 0 0 12px rgba(230,190,115,0)}}
 /* Stock + size hints */
 .stock-note{margin-top:8px;font-size:13px;font-weight:700;color:var(--danger)}
 .stock-note.ok{color:var(--ok)}
@@ -931,7 +934,7 @@ button.addr-card:hover{border-color:var(--ink)}
           <div><h5>Categories</h5><div id="megaCats"></div></div>
           <div><h5>Collections</h5><div id="megaCols"></div></div>
           <div><h5>Shop by colour</h5><div class="mega-sw" id="megaSw"></div></div>
-          <div><h5>Featured</h5><a class="mega-feat" href="#limited" id="megaFeat"><span>Gilded Drop 04 · 15 Nov</span></a></div>
+          <div><h5>Featured</h5><a class="mega-feat" href="#limited" id="megaFeat"><span>Gilded Drop 04</span></a></div>
         </div></div></div>
       <a href="#new" data-nav="new">New</a>
       <a href="#trending" data-nav="trending">Trending</a>
@@ -1034,7 +1037,12 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 const SALE={pct:40,name:'New Year Rich Sale',endLabel:'31 Jan 2027, 11:59 PM',start:new Date('2026-11-15T00:00:00+05:30').getTime(),end:new Date('2027-01-31T23:59:59+05:30').getTime()};
 const saleOn=()=>{const n=Date.now();return n>=SALE.start&&n<=SALE.end};
 const SALE_END=SALE.end;
-const DROP_END=new Date('2026-11-15T20:00:00+05:30').getTime();
+/* Drops open at 8 PM IST. Change the dates here and every countdown, label and teaser follows. */
+const DROP_AT=d=>new Date(d+'T20:00:00+05:30').getTime();
+const dropDay=(ts,o={})=>new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata',...o});
+const fmtDrop=ts=>`${dropDay(ts,{year:'numeric'})} · 8 PM IST`;
+const GILDED={n:'Gilded Drop 04',at:DROP_AT('2026-12-06')};
+const DROP_END=GILDED.at;
 const COLORS={
   black:{n:'Jet Black',h:'#1F1E22'},white:{n:'Off White',h:'#F2F0EB'},cream:{n:'Cream',h:'#E9DFCB'},oxblood:{n:'Oxblood',h:'#6B1D2B'},
   sage:{n:'Sage',h:'#98A986'},navy:{n:'Navy',h:'#1F2940'},sand:{n:'Sand',h:'#D3BE9B'},charcoal:{n:'Charcoal',h:'#3C3B40'},
@@ -1125,7 +1133,7 @@ function descFor(p){
 }
 const colName=id=>COLLECTIONS.find(c=>c.id===id)?.n||id;
 const DROPS={1:{n:'Drop 05',d:'Mon, 26 Oct 2026'},2:{n:'Drop 04',d:'Mon, 19 Oct 2026'},3:{n:'Drop 03',d:'Mon, 12 Oct 2026'}};
-const COMING=[{id:'c1',n:'Gilded Edition · Drop 04',d:'15 Nov 2026 · 8 PM IST',p:2,c:'navy'},{id:'c2',n:'Monsoon Acid Lab',d:'22 Nov 2026 · 8 PM IST',p:29,c:'charcoal'},{id:'c3',n:'Her Oversized · Winter Full Sleeve',d:'29 Nov 2026 · 8 PM IST',p:25,c:'lavender'}];
+const COMING=[{id:'c1',n:'Gilded Edition · Drop 04',at:GILDED.at,p:2,c:'navy'},{id:'c2',n:'Monsoon Acid Lab',at:DROP_AT('2026-11-22'),p:29,c:'charcoal'},{id:'c3',n:'Her Oversized · Winter Full Sleeve',at:DROP_AT('2026-11-29'),p:25,c:'lavender'}].map(c=>({...c,d:fmtDrop(c.at)})).sort((a,b)=>a.at-b.at);
 const PAST=[{n:'Gilded Drop 03',d:'Aug 2026',s:'Sold out in 22 minutes',items:[[2,'cream'],[16,'black'],[18,'oxblood']]},{n:'Gilded Drop 02',d:'May 2026',s:'Sold out in 41 minutes',items:[[1,'black'],[17,'black'],[2,'navy']]},{n:'Gilded Drop 01',d:'Feb 2026',s:'Sold out in 14 minutes',items:[[1,'oxblood'],[16,'sand'],[18,'bottle']]}];
 const LOOKS=[
  {id:'l1',n:'Weekend Old Money',p:3,c:'white',pants:'#C9B48F',shoe:'#F4F1EA',cap:'#1F2A44',tip:'Half-tuck the front, roll the sleeves once, finish with pleated chinos and clean white sneakers.',items:['Pleated chinos','White leather sneakers','Navy cap'],col:'old-money',vibe:'Smart casual'},
@@ -1690,7 +1698,7 @@ function pageNew(){
     <div class="drop-head" data-aos="fade-up"><h2>${d.n}</h2><span class="muted">${d.d}</span>${k==='1'?'<span class="pill new">Latest</span>':''}<span class="muted" style="margin-left:auto">${items.length} styles</span></div>
     <div class="grid">${items.map(card).join('')}</div></div></section>`}).join('')}
   <section class="sec" id="coming"><div class="wrap"><div class="sec-head" data-aos="fade-up"><div><span class="eyebrow">On the calendar</span><h2>Coming soon</h2></div><p class="muted" style="max-width:40ch">Set a reminder and we will email you 30 minutes before each drop opens.</p></div>
-    <div class="teasers">${COMING.map(teaser).join('')}</div></div></section>`;
+    <div class="teasers">${COMING.filter(c=>c.at>Date.now()).map(teaser).join('')}</div></div></section>`;
 }
 /* ---------- Trending ---------- */
 function mvTag(p){return p.mv>0?`<span class="mv up">▲ ${p.mv}</span>`:p.mv<0?`<span class="mv dn">▼ ${-p.mv}</span>`:p.drop?'<span class="mv nw">NEW</span>':'<span class="mv">—</span>'}
@@ -1721,7 +1729,7 @@ function pageLimited(){
   const live=P.filter(p=>p.tags.includes('limited')),on=state.notify.includes('c1');
   return `<div class="lim-page">
   <section class="lim-hero"><div class="wrap ph-grid">
-    <div data-aos="fade-right"><div class="crumbs"><a href="#home">Home</a>/<span>Limited edition</span></div><span class="eyebrow" style="display:block;margin-top:16px">Next drop · 15 Nov 2026 · 8 PM IST</span>
+    <div data-aos="fade-right"><div class="crumbs"><a href="#home">Home</a>/<span>Limited edition</span></div><span class="eyebrow" style="display:block;margin-top:16px">Next drop · ${fmtDrop(GILDED.at)}</span>
       <h1 class="lim-h1">Gilded <em>Drop 04</em></h1><p class="lead2">Three new designs, 300 numbered pieces each. Metallic puff print on 260 GSM garment-dyed cotton, with a woven serial label and a digital certificate.</p>
       <div style="margin-top:22px">${cdBoxes(DROP_END)}</div>
       <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap"><button class="btn btn-brass" data-act="notify" data-v="c1">${on?'✓ You will be notified':'Notify me before it drops'}</button><button class="btn btn-outline-light" data-act="scroll-to" data-target="lim-live">Shop pieces still available</button></div></div>
@@ -2129,7 +2137,7 @@ function heroGo(i,user){const tr=$('#heroTrack');if(!tr)return;const n=tr.childr
   if(user){clearInterval(heroT);heroT=setInterval(()=>heroGo(heroI+1),5500)}}
 
 /* ================= Countdown ================= */
-function tickCountdowns(){$$('[data-countdown]').forEach(el=>{let d=Math.max(0,+el.dataset.countdown-Date.now())/1000;const v={Days:Math.floor(d/86400),Hrs:Math.floor(d%86400/3600),Min:Math.floor(d%3600/60),Sec:Math.floor(d%60)};
+function tickCountdowns(){$$('[data-countdown]').forEach(el=>{if(+el.dataset.countdown<=Date.now()){if(!el.dataset.live){el.dataset.live='1';el.innerHTML='<div class="cd-live"><span class="pulse-dot"></span>Live now</div>'}return}let d=Math.max(0,+el.dataset.countdown-Date.now())/1000;const v={Days:Math.floor(d/86400),Hrs:Math.floor(d%86400/3600),Min:Math.floor(d%3600/60),Sec:Math.floor(d%60)};
   el.querySelectorAll('[data-u]').forEach(b=>b.textContent=String(v[b.dataset.u]).padStart(2,'0'))})}
 setInterval(tickCountdowns,1000);
 
@@ -2418,7 +2426,7 @@ $('#modalOv').addEventListener('click',e=>{if(e.target.id==='modalOv')closeModal
 $('#drawerOv').addEventListener('click',closeDrawer);
 
 /* ================= Announcement rotation ================= */
-const ANN=[...(saleOn()?[`<b>Flat ${SALE.pct}% off sitewide</b> · ${SALE.name} ends 31 Jan`]:[]),'Free shipping on orders above <b>₹999</b> · Use <b>OVER10</b> for an extra 10% off','<b>Gilded Edition</b> drops 15 Nov · Only 300 numbered pieces','Cash on delivery across India · <b>7-day</b> easy returns'];let annI=0;
+const ANN=[...(saleOn()?[`<b>Flat ${SALE.pct}% off sitewide</b> · ${SALE.name} ends 31 Jan`]:[]),'Free shipping on orders above <b>₹999</b> · Use <b>OVER10</b> for an extra 10% off',`<b>Gilded Edition</b> drops ${dropDay(GILDED.at)} · Only 300 numbered pieces`,'Cash on delivery across India · <b>7-day</b> easy returns'];let annI=0;
 $('#announceText').innerHTML=ANN[0];
 setInterval(()=>{annI=(annI+1)%ANN.length;const el=$('#announceText');el.style.opacity=0;setTimeout(()=>{el.innerHTML=ANN[annI];el.style.opacity=1},250)},4500);
 $('#announceText').style.transition='opacity .25s';
@@ -2428,6 +2436,7 @@ $('#announceText').style.transition='opacity .25s';
 $('#megaCats').innerHTML=CATS.map(c=>`<a class="ml" href="#cat-${c.id}">${c.n}<span>${P.filter(c.test).length}</span></a>`).join('');
 $('#megaCols').innerHTML=COLLECTIONS.map(c=>`<a class="ml" href="#collection-${c.id}">${c.n}<span>${P.filter(p=>p.col===c.id).length}</span></a>`).join('');
 $('#megaSw').innerHTML=Object.entries(COLORS).map(([k,c])=>`<a href="#color-${k}"><i style="background:${c.h}"></i>${c.n.replace('Grey ','').replace('Bottle ','')}</a>`).join('');
+$('#megaFeat span').textContent=`${GILDED.n} · ${dropDay(GILDED.at)}`;
 $('#megaFeat').insertAdjacentHTML('afterbegin',`<img src="${teeImg(byId(2),'navy','hanger',{bg:'#2A2430'})}" alt="">`);
 bindSearch($('#searchInput'),$('#suggest'));bindSearch($('#searchInputM'),$('#suggestM'));
 window.addEventListener('hashchange',route);
